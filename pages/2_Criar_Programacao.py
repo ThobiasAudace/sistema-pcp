@@ -20,13 +20,14 @@ usuario = st.session_state['usuario']
 perfil = usuario.get('perfil')
 nome_usuario = usuario.get('nome', '').upper()
 
-# Acesso: ADMIN, DIRETORIA, ou Vinicius (SUPERVISOR responsavel por criar)
-tem_acesso_criar = perfil in ["ADMIN", "DIRETORIA"] or nome_usuario == "VINICIUS"
-if not tem_acesso_criar:
-    st.error("Acesso negado.")
-    st.stop()
+# Acesso total: ADMIN, DIRETORIA, ou Vinicius
+pode_editar = perfil in ["ADMIN", "DIRETORIA"] or nome_usuario == "VINICIUS"
+# Visualização: todos os demais logados podem ver
 
 st.title("Criar Programacao de Producao")
+
+if not pode_editar:
+    st.info("Voce esta no modo visualizacao. Apenas usuarios autorizados podem criar programacoes.")
 
 # Session state
 if 'itens_programacao' not in st.session_state:
@@ -39,9 +40,9 @@ if 'temp_produto_add' not in st.session_state:
 # Data e descrição
 col1, col2 = st.columns([1, 2])
 with col1:
-    data_programacao = st.date_input("Data da Programacao", datetime.date.today(), format="DD/MM/YYYY")
+    data_programacao = st.date_input("Data da Programacao", datetime.date.today(), format="DD/MM/YYYY", disabled=not pode_editar)
 with col2:
-    descricao_sessao = st.text_input("Descricao", placeholder="Ex: Programacao 09/10/2026")
+    descricao_sessao = st.text_input("Descricao", placeholder="Ex: Programacao 09/10/2026", disabled=not pode_editar)
 
 st.divider()
 
@@ -65,6 +66,7 @@ sku_selecionado = st.selectbox(
     options=opcoes_sku,
     index=0,
     placeholder="Digite o SKU ou nome do produto...",
+    disabled=not pode_editar,
 )
 
 # Extrair SKU da opção selecionada
@@ -77,12 +79,15 @@ if sku_selecionado and " — " in sku_selecionado:
         pass
 
 # Mostrar detalhes do produto encontrado
-if produto_encontrado:
+adicionar_clicked = False
+quantidade_input = 1
+linha_escolhida = None
+
+if produto_encontrado and pode_editar:
     col_vol, col_linha, col_qtd, col_btn = st.columns([1, 1, 1, 1])
     with col_vol:
         st.metric("Volume", f"{produto_encontrado.volume_ml} mL")
     with col_linha:
-        # Todos os perfumes permitem escolha, com padrao pre-selecionado
         default_linha = produto_encontrado.linha_producao or "MANUAL"
         linha_escolhida = st.selectbox(
             "Linha de Producao:",
@@ -94,6 +99,8 @@ if produto_encontrado:
     with col_btn:
         st.write("")
         adicionar_clicked = st.button("Adicionar Item", type="primary", use_container_width=True)
+elif produto_encontrado and not pode_editar:
+    st.info(f"Produto: {produto_encontrado.nome_produto} | Volume: {produto_encontrado.volume_ml} mL")
 elif sku_selecionado and sku_selecionado.strip():
     st.error(f"SKU '{sku_selecionado}' nao encontrado no cadastro.")
     quantidade_input = 1
@@ -196,7 +203,7 @@ else:
 st.divider()
 
 # ─── Gerar Programação ──────────────────────────────────────────────
-if itens:
+if itens and pode_editar:
     if st.button("GERAR PROGRAMACAO", type="primary", use_container_width=True):
         if not descricao_sessao:
             st.error("Preencha a Descricao da programacao.")
