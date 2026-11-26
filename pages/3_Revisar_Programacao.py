@@ -48,9 +48,11 @@ def renderizar_tabela_edicao(itens_linha, linha_nome, sessao_id):
     
     dados = []
     for item in itens_linha:
+        sku = item.produto.sku if item.produto else ""
         dados.append({
             'ID': item.id,
             'Prioridade': item.prioridade,
+            'SKU': sku,
             'Produto': item.nome_produto,
             'Qtd (un)': item.quantidade_un,
             'Lote': item.lote,
@@ -63,7 +65,7 @@ def renderizar_tabela_edicao(itens_linha, linha_nome, sessao_id):
     df = pd.DataFrame(dados)
     
     # Colunas não editáveis
-    colunas_fixas = ['ID', 'Produto', 'Lote', 'Volume (mL)', 'Vol Total (L)', 'Bateladas']
+    colunas_fixas = ['ID', 'SKU', 'Produto', 'Lote', 'Volume (mL)', 'Vol Total (L)', 'Bateladas']
     
     with st.form(f"form_{linha_nome}_{sessao_id}"):
         df_editado = st.data_editor(
@@ -152,6 +154,7 @@ def renderizar_tabela_leitura(itens_linha):
         return
     dados = [{
         'Prioridade': item.prioridade,
+        'SKU': item.produto.sku if item.produto else "",
         'Produto': item.nome_produto,
         'Qtd (un)': fmt_int(item.quantidade_un),
         'Lote': item.lote,
