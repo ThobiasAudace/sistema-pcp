@@ -4,3 +4,5 @@ bcrypt
 pandas
 plotly
 openpyxl
+xlsxwriter
+reportlab
