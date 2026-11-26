@@ -278,8 +278,9 @@ def transferir_produto_em_massa(lote_ids: List[int], usuario_id: int = None, usu
 
 def listar_itens_sessao(sessao_id: int) -> List[Programacao]:
     """Lista todos os itens de uma sessão de programação."""
+    from sqlalchemy.orm import joinedload
     with get_db() as db:
-        return db.query(Programacao).filter(
+        return db.query(Programacao).options(joinedload(Programacao.produto)).filter(
             Programacao.sessao_id == sessao_id
         ).order_by(Programacao.prioridade).all()
 
@@ -288,8 +289,9 @@ def listar_programacao(data_inicio=None, data_fim=None,
                        linha_producao=None, status=None, 
                        grupo=None, sessao_id=None) -> List[Programacao]:
     """Lista programações com filtros opcionais."""
+    from sqlalchemy.orm import joinedload
     with get_db() as db:
-        query = db.query(Programacao)
+        query = db.query(Programacao).options(joinedload(Programacao.produto))
         if data_inicio:
             query = query.filter(Programacao.data_programacao >= data_inicio)
         if data_fim:
