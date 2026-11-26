@@ -20,13 +20,15 @@ unome = usuario.get("nome")
 perfil = usuario.get("perfil")
 nome_upper = unome.upper() if unome else ""
 
-# Acesso: ADMIN ou Amanda (responsavel por producao)
-tem_acesso_producao = perfil == "ADMIN" or nome_upper in ["AMANDA", "ERICK"]
-if not tem_acesso_producao:
-    st.error("Acesso negado. Voce nao tem permissao para gerenciar a producao.")
-    st.stop()
+# Acesso total: ADMIN, Amanda ou Erick
+pode_editar = perfil == "ADMIN" or nome_upper in ["AMANDA", "ERICK"]
+# Visualização: todos os logados podem ver
 
 st.title("Producao Ativa")
+
+if not pode_editar:
+    st.info("Voce esta no modo visualizacao. Apenas operadores autorizados podem gerenciar a producao.")
+
 st.caption("Acompanhe o ciclo: Aguardando Inicio -> Em Producao -> Producao Finalizada -> Transferido")
 
 # ── Filtros ───────────────────────────────────────────────────────────
@@ -165,6 +167,9 @@ try:
             )
 
             # ── Botoes de acao ────────────────────────────────────────
+            if not pode_editar:
+                return
+
             st.subheader("Acoes")
 
             # Agrupar lotes por status para cada acao
