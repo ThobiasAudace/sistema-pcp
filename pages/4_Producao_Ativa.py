@@ -136,9 +136,11 @@ try:
                     tempo = calcular_tempo_producao(p.inicio_producao_em, dt.now())
                     tempo_txt = f"{tempo['texto']} (em andamento)"
 
+                sku = p.produto.sku if p.produto else ""
                 data.append({
                     "id": p.id,
                     "Prioridade": p.prioridade,
+                    "SKU": sku,
                     "Produto": p.nome_produto,
                     "Qtd": fmt_int(p.quantidade_un),
                     "Lote": p.lote,
