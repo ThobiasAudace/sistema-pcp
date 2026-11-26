@@ -12,9 +12,15 @@ def exportar_programacao_excel(programacoes: List[Programacao]) -> bytes:
         
     data = []
     for p in programacoes:
+        sku = ""
+        try:
+            sku = p.produto.sku if p.produto else ""
+        except Exception:
+            pass
         data.append({
             'DATA': p.data_programacao.strftime('%d/%m/%Y') if p.data_programacao else '',
             'PRIORIDADE': p.prioridade,
+            'SKU': sku,
             'LINHA': p.linha_producao,
             'LOTE': p.lote,
             'PRODUTO': p.nome_produto,
