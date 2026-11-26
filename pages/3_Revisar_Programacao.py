@@ -16,11 +16,9 @@ usuario = st.session_state['usuario']
 perfil = usuario.get('perfil')
 nome_usuario = usuario.get('nome', '').upper()
 
-# Acesso: ADMIN ou Erick/Amanda (revisores)
-tem_acesso_revisar = perfil in ['ADMIN'] or nome_usuario in ['ERICK', 'AMANDA']
-if not tem_acesso_revisar:
-    st.error("Acesso negado. Voce nao tem permissao para revisar programacoes.")
-    st.stop()
+# Acesso total: ADMIN ou Erick/Amanda
+pode_editar = perfil in ['ADMIN'] or nome_usuario in ['ERICK', 'AMANDA']
+# Visualização: todos os logados podem ver
 
 try:
     from services.programacao_service import (
@@ -35,6 +33,9 @@ except ImportError as e:
     st.stop()
 
 st.title("Revisar Programacao")
+
+if not pode_editar:
+    st.info("Voce esta no modo visualizacao. Apenas revisores autorizados podem editar.")
 
 tab_geradas, tab_finalizadas = st.tabs(["Pendentes de Revisao", "Finalizadas"])
 
@@ -81,7 +82,7 @@ def renderizar_tabela_edicao(itens_linha, linha_nome, sessao_id):
             }
         )
         
-        if st.form_submit_button("Salvar Alteracoes", type="primary"):
+        if pode_editar and st.form_submit_button("Salvar Alteracoes", type="primary"):
             try:
                 atualizacoes_prio = []
                 for _, row in df_editado.iterrows():
@@ -112,6 +113,9 @@ def renderizar_tabela_edicao(itens_linha, linha_nome, sessao_id):
     st.markdown("**Reordenar:**")
     col_mover, col_excluir = st.columns(2)
     
+    if not pode_editar:
+        return
+
     with col_mover:
         lotes_opcoes = {f"{item.lote} - {item.nome_produto}": item for item in itens_linha}
         lote_sel = st.selectbox("Lote:", [""] + list(lotes_opcoes.keys()), key=f"mover_{linha_nome}_{sessao_id}")
@@ -201,7 +205,7 @@ with tab_geradas:
                 col_fin, col_excel, col_pdf = st.columns([2, 1, 1])
                 
                 with col_fin:
-                    if st.button("FINALIZAR PROGRAMACAO", type="primary", use_container_width=True):
+                    if pode_editar and st.button("FINALIZAR PROGRAMACAO", type="primary", use_container_width=True):
                         try:
                             ok = finalizar_programacao(sessao_id, usuario['id'], usuario['nome'])
                             if ok:
