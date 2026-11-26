@@ -19,20 +19,20 @@ def exportar_programacao_excel(programacoes: List[Programacao]) -> bytes:
             pass
         data.append({
             'DATA': p.data_programacao.strftime('%d/%m/%Y') if p.data_programacao else '',
-            'PRIORIDADE': p.prioridade,
-            'SKU': sku,
-            'LINHA': p.linha_producao,
-            'LOTE': p.lote,
-            'PRODUTO': p.nome_produto,
-            'VOLUME (ml)': p.volume_ml,
-            'ESSÊNCIA': p.essencia,
-            '% ESSÊNCIA': p.pct_essencia,
-            'QTD (UN)': p.quantidade_un,
-            'BATELADAS': p.num_bateladas,
-            'VOLUME TOTAL (L)': p.volume_total_l,
-            'QTD ESSÊNCIA (KG)': p.qtd_essencia_kg,
-            'STATUS': p.status,
-            'OBSERVAÇÃO': p.observacao
+            'PRIORIDADE': p.prioridade or 0,
+            'SKU': sku or '',
+            'LINHA': p.linha_producao or '',
+            'LOTE': p.lote or '',
+            'PRODUTO': p.nome_produto or '',
+            'VOLUME (ml)': p.volume_ml or 0,
+            'ESSÊNCIA': p.essencia or '',
+            '% ESSÊNCIA': p.pct_essencia or 0,
+            'QTD (UN)': p.quantidade_un or 0,
+            'BATELADAS': p.num_bateladas or 1,
+            'VOLUME TOTAL (L)': p.volume_total_l or 0,
+            'QTD ESSÊNCIA (KG)': p.qtd_essencia_kg or 0,
+            'STATUS': p.status or '',
+            'OBSERVAÇÃO': p.observacao or ''
         })
         
     df = pd.DataFrame(data)
